@@ -15,6 +15,7 @@ export class GqlConfigService implements GqlOptionsFactory {
       sortSchema: graphqlConfig.sortSchema,
       buildSchemaOptions: {
         numberScalarMode: 'integer',
+        //dateScalarMode: 'isoDate',
       },
       // subscription
       installSubscriptionHandlers: true,

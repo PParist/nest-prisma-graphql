@@ -8,9 +8,15 @@ import { AppResolver } from './app.resolver';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { PostsModule } from './posts/posts.module';
-import config from './common/configs/config';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { GqlConfigService } from './gql-config.service';
+import { RolesModule } from './roles/roles.module';
+import { DateScalar } from './common/scalars/date.scalar';
+
+import { registerGraphQLEnums } from './common/graphql/enums';
+import config from './common/configs/config';
+
+registerGraphQLEnums(config().graphql);
 
 @Module({
   imports: [
@@ -36,8 +42,9 @@ import { GqlConfigService } from './gql-config.service';
     AuthModule,
     UsersModule,
     PostsModule,
+    RolesModule,
   ],
   controllers: [AppController],
-  providers: [AppService, AppResolver],
+  providers: [AppService, AppResolver, DateScalar],
 })
 export class AppModule {}

@@ -11,11 +11,10 @@ import { UseGuards } from '@nestjs/common';
 import { UserEntity } from '../common/decorators/user.decorator';
 import { GqlAuthGuard } from '../auth/gql-auth.guard';
 import { UsersService } from './users.service';
-import { User } from './models/user.model';
-import { ChangePasswordInput } from './dto/change-password.input';
+import { UserAccount } from './models/user.model';
 import { UpdateUserInput } from './dto/update-user.input';
-
-@Resolver(() => User)
+import { Role } from 'src/roles/entities/role.entity';
+@Resolver(() => UserAccount)
 @UseGuards(GqlAuthGuard)
 export class UsersResolver {
   constructor(
@@ -23,35 +22,29 @@ export class UsersResolver {
     private prisma: PrismaService,
   ) {}
 
-  @Query(() => User)
-  async me(@UserEntity() user: User): Promise<User> {
+  @Query(() => UserAccount)
+  async myuser(@UserEntity() user: UserAccount): Promise<UserAccount> {
     return user;
   }
 
+  @Query(() => UserAccount)
+  async user(@Args('uuid') uuid: string): Promise<UserAccount> {
+    return this.usersService.findOneUser(uuid);
+  }
+
   @UseGuards(GqlAuthGuard)
-  @Mutation(() => User)
+  @Mutation(() => UserAccount)
   async updateUser(
-    @UserEntity() user: User,
+    @UserEntity() user: UserAccount,
     @Args('data') newUserData: UpdateUserInput,
   ) {
-    return this.usersService.updateUser(user.id, newUserData);
+    return this.usersService.updateUser(user.uuid, newUserData);
   }
 
-  @UseGuards(GqlAuthGuard)
-  @Mutation(() => User)
-  async changePassword(
-    @UserEntity() user: User,
-    @Args('data') changePassword: ChangePasswordInput,
-  ) {
-    return this.usersService.changePassword(
-      user.id,
-      user.password,
-      changePassword,
-    );
-  }
-
-  @ResolveField('posts')
-  posts(@Parent() author: User) {
-    return this.prisma.user.findUnique({ where: { id: author.id } }).posts();
+  @ResolveField(() => Role)
+  role(@Parent() user: UserAccount) {
+    return this.prisma.userAccounts
+      .findUnique({ where: { uuid: user.uuid } })
+      .roles();
   }
 }

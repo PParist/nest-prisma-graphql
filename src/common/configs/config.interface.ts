@@ -27,6 +27,9 @@ export interface GraphqlConfig {
   debug: boolean;
   schemaDestination: string;
   sortSchema: boolean;
+  enumsConfig?: {
+    enableLoginType?: boolean;
+  };
 }
 
 export interface SecurityConfig {

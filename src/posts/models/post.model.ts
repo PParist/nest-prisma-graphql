@@ -1,5 +1,5 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { User } from '../../users/models/user.model';
+import { UserAccount } from '../../users/models/user.model';
 import { BaseModel } from '../../common/models/base.model';
 
 @ObjectType()
@@ -13,6 +13,6 @@ export class Post extends BaseModel {
   @Field(() => Boolean)
   published: boolean;
 
-  @Field(() => User, { nullable: true })
-  author?: User | null;
+  @Field(() => UserAccount, { nullable: true })
+  author?: UserAccount | null;
 }

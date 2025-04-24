@@ -1,41 +1,94 @@
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
 generator client {
   provider = "prisma-client-js"
-  // previewFeatures = []
 }
 
 generator dbml {
   provider = "prisma-dbml-generator"
 }
 
-model User {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  email     String   @unique
-  password  String
-  firstname String?
-  lastname  String?
-  posts     Post[]
-  role      Role
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-model Post {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  published Boolean
-  title     String
-  content   String?
-  author    User?    @relation(fields: [authorId], references: [id])
-  authorId  String?
+model Permissions {
+  id               Int                @id @default(autoincrement())
+  uuid             String             @unique
+  name             String             @map("name")
+  code             String             @map("code")
+  description      String             @map("description")
+  createdAt        DateTime           @map("created_at")
+  createdBy        String             @map("created_by")
+  updatedAt        DateTime           @map("updated_at")
+  updatedBy        String             @map("updated_by")
+  deletedAt        DateTime?          @map("deleted_at")
+  deletedBy        String?            @map("deleted_by")
+  version          String             @map("version")
+  rolePermissions  RolePermissions[]
+
+  @@map("permissions")
 }
 
-enum Role {
-  ADMIN
-  USER
+model RolePermissions {
+  id              Int         @id @default(autoincrement())
+  roleUuid        String       @map("role_uuid")
+  permissionUuid  String       @map("permission_uuid")
+  createdAt       DateTime     @map("created_at")
+  createdBy       String       @map("created_by")
+  updatedAt       DateTime     @map("updated_at")
+  updatedBy       String       @map("updated_by")
+  deletedAt       DateTime?    @map("deleted_at")
+  deletedBy       String?      @map("deleted_by")
+  version         String       @map("version")
+  permissions     Permissions  @relation(fields: [permissionUuid], references: [uuid])
+  roles           Roles        @relation(fields: [roleUuid], references: [uuid])
+
+  @@map("role_permissions")
+}
+
+model Roles {
+  id              Int                @id @default(autoincrement())
+  uuid            String             @unique
+  name            String             @unique
+  description     String             @map("description")
+  createdAt       DateTime           @map("created_at")
+  createdBy       String             @map("created_by")
+  updatedAt       DateTime           @map("updated_at")
+  updatedBy       String             @map("updated_by")
+  deletedAt       DateTime?          @map("deleted_at")
+  deletedBy       String?            @map("deleted_by")
+  version         String             @map("version")
+  rolePermissions RolePermissions[]
+  userAccounts    UserAccounts[]
+  @@map("roles")
+}
+
+model UserAccounts {
+  id          Int       @id @default(autoincrement())
+  uuid        String    @unique
+  description String    @map("description")
+  email       String    @unique
+  roleUuid    String?   @map("role_uuid")
+  loginType   LoginType @map("login_type")
+  loginToken  String    @map("login_token")
+  deviceUuid  String    @map("device_uuid")
+  ipAddress   String    @map("ip_address")
+  createdAt   DateTime  @map("created_at")
+  createdBy   String    @map("created_by")
+  updatedAt   DateTime  @map("updated_at")
+  updatedBy   String    @map("updated_by")
+  deletedAt   DateTime? @map("deleted_at")
+  deletedBy   String?   @map("deleted_by")
+  version     String    @map("version")
+  roles       Roles?    @relation(fields: [roleUuid], references: [uuid])
+  @@map("user_accounts")
+}
+
+enum LoginType {
+  NONE
+  GOOGLE
+  FACEBOOK
+  APPLE
+  HUAWEI
+  GUEST
 }
