@@ -2,32 +2,84 @@
 //// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 //// ------------------------------------------------------
 
-Table User {
-  id String [pk]
-  createdAt DateTime [default: `now()`, not null]
+Table permissions {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  name String [not null]
+  code String [not null]
+  description String [not null]
+  createdAt DateTime [not null]
+  createdBy String [not null]
   updatedAt DateTime [not null]
+  updatedBy String [not null]
+  deletedAt DateTime
+  deletedBy String
+  version String [not null]
+  rolePermissions role_permissions [not null]
+}
+
+Table role_permissions {
+  id Int [pk, increment]
+  roleUuid String [not null]
+  permissionUuid String [not null]
+  createdAt DateTime [not null]
+  createdBy String [not null]
+  updatedAt DateTime [not null]
+  updatedBy String [not null]
+  deletedAt DateTime
+  deletedBy String
+  version String [not null]
+  permissions permissions [not null]
+  roles roles [not null]
+}
+
+Table roles {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  name String [unique, not null]
+  description String [not null]
+  createdAt DateTime [not null]
+  createdBy String [not null]
+  updatedAt DateTime [not null]
+  updatedBy String [not null]
+  deletedAt DateTime
+  deletedBy String
+  version String [not null]
+  rolePermissions role_permissions [not null]
+  userAccounts user_accounts [not null]
+}
+
+Table user_accounts {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  description String [not null]
   email String [unique, not null]
-  password String [not null]
-  firstname String
-  lastname String
-  posts Post [not null]
-  role Role [not null]
-}
-
-Table Post {
-  id String [pk]
-  createdAt DateTime [default: `now()`, not null]
+  roleUuid String
+  loginType LoginType [not null]
+  loginToken String [not null]
+  deviceUuid String [not null]
+  ipAddress String [not null]
+  createdAt DateTime [not null]
+  createdBy String [not null]
   updatedAt DateTime [not null]
-  published Boolean [not null]
-  title String [not null]
-  content String
-  author User
-  authorId String
+  updatedBy String [not null]
+  deletedAt DateTime
+  deletedBy String
+  version String [not null]
+  roles roles
 }
 
-Enum Role {
-  ADMIN
-  USER
+Enum LoginType {
+  NONE
+  GOOGLE
+  FACEBOOK
+  APPLE
+  HUAWEI
+  GUEST
 }
 
-Ref: Post.authorId > User.id
+Ref: role_permissions.permissionUuid > permissions.uuid
+
+Ref: role_permissions.roleUuid > roles.uuid
+
+Ref: user_accounts.roleUuid > roles.uuid
