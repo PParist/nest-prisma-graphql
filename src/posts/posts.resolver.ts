@@ -29,7 +29,7 @@ export class PostsResolver {
 
   @Subscription(() => Post)
   postCreated() {
-    return pubSub.asyncIterator('postCreated');
+    return pubSub.asyncIterableIterator('postCreated');
   }
 
   // @UseGuards(GqlAuthGuard)
