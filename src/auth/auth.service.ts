@@ -51,9 +51,14 @@ export class AuthService {
           version: payload.version,
         },
       });
+      const userWithRole = await this.prisma.userAccounts.findUnique({
+        where: { uuid: newUser.uuid },
+        include: { roles: true },
+      });
       const tokens = this.generateTokens({
         email: newUser.email,
         userUuid: newUser.uuid,
+        role: userWithRole.roles.name,
       });
       return {
         user: newUser,
@@ -88,6 +93,9 @@ export class AuthService {
         email: loginInput.email,
         loginType: loginInput.login_type,
       },
+      include: {
+        roles: true, 
+      },
     });
 
     if (user.deviceUuid !== loginInput.device_uuid) {
@@ -106,6 +114,7 @@ export class AuthService {
     return this.generateTokens({
       email: user.email,
       userUuid: user.uuid,
+      role: user.roles.name,
     });
   }
 
@@ -118,7 +127,7 @@ export class AuthService {
     return this.prisma.userAccounts.findUnique({ where: { uuid } });
   }
 
-  generateTokens(payload: { email: string; userUuid: string }): Token {
+  generateTokens(payload: { email: string; userUuid: string; role: string }): Token {
     return {
       accessToken: this.generateAccessToken(payload),
       refreshToken: this.generateRefreshToken(payload),
@@ -142,13 +151,14 @@ export class AuthService {
 
   refreshToken(token: string) {
     try {
-      const { email, userUuid } = this.jwtService.verify(token, {
+      const { email, userUuid, role } = this.jwtService.verify(token, {
         secret: this.configService.get('JWT_REFRESH_SECRET'),
       });
 
       return this.generateTokens({
         email,
-        userUuid: userUuid,
+        userUuid,
+        role,
       });
     } catch (e) {
       throw new UnauthorizedException();
