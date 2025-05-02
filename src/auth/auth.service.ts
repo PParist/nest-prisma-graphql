@@ -3,7 +3,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { Prisma, UserAccounts } from '@prisma/client';
 import {
   Injectable,
-  NotFoundException,
   BadRequestException,
   ConflictException,
   UnauthorizedException,
@@ -94,7 +93,7 @@ export class AuthService {
         loginType: loginInput.login_type,
       },
       include: {
-        roles: true, 
+        roles: true,
       },
     });
 
@@ -103,9 +102,6 @@ export class AuthService {
         'Login attempt from different device detected.',
       );
     }
-    //else if (user.roleUuid !== loginInput.role) {
-    //   throw new UnauthorizedException('Role mismatch detected.');
-    // }
 
     if (!user) {
       throw new UnauthorizedException('User Not Found.');
@@ -127,7 +123,11 @@ export class AuthService {
     return this.prisma.userAccounts.findUnique({ where: { uuid } });
   }
 
-  generateTokens(payload: { email: string; userUuid: string; role: string }): Token {
+  generateTokens(payload: {
+    email: string;
+    userUuid: string;
+    role: string;
+  }): Token {
     return {
       accessToken: this.generateAccessToken(payload),
       refreshToken: this.generateRefreshToken(payload),
@@ -161,7 +161,7 @@ export class AuthService {
         role,
       });
     } catch (e) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException(e.message);
     }
   }
 }

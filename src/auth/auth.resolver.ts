@@ -22,9 +22,8 @@ export class AuthResolver {
   async register(@Args('data') data: RegisterInput, @Context() context) {
     data.email = data.email.toLowerCase();
     data.ip_address = this.getIpAddress(context.req);
-    const { user, accessToken, refreshToken } = await this.auth.createUser(
-      data,
-    );
+    const { user, accessToken, refreshToken } =
+      await this.auth.createUser(data);
     return {
       user,
       accessToken,
