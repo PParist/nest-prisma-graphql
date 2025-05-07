@@ -8,6 +8,7 @@ import { AuthService } from './auth.service';
 import { AuthResolver } from './auth.resolver';
 import { JwtStrategy } from './jwt.strategy';
 import { SecurityConfig } from '../common/configs/config.interface';
+import { Reflector } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -30,6 +31,13 @@ import { SecurityConfig } from '../common/configs/config.interface';
     AuthService,
     AuthResolver,
     JwtStrategy,
+    {
+      provide: GqlAuthGuard,
+      useFactory: (reflector: Reflector) => {
+        return new GqlAuthGuard(reflector);
+      },
+      inject: [Reflector],
+    },
     GqlAuthGuard,
     PasswordService,
   ],

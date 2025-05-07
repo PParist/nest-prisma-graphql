@@ -23,10 +23,11 @@ model Permissions {
   updatedBy        String             @map("updated_by")
   deletedAt        DateTime?          @map("deleted_at")
   deletedBy        String?            @map("deleted_by")
-  version          String             @map("version")
+  version          Int                @map("version")
   rolePermissions  RolePermissions[]
 
   @@map("permissions")
+  @@index([uuid])
 }
 
 model RolePermissions {
@@ -39,7 +40,7 @@ model RolePermissions {
   updatedBy       String       @map("updated_by")
   deletedAt       DateTime?    @map("deleted_at")
   deletedBy       String?      @map("deleted_by")
-  version         String       @map("version")
+  version         Int          @map("version")
   permissions     Permissions  @relation(fields: [permissionUuid], references: [uuid])
   roles           Roles        @relation(fields: [roleUuid], references: [uuid])
 
@@ -57,16 +58,17 @@ model Roles {
   updatedBy       String             @map("updated_by")
   deletedAt       DateTime?          @map("deleted_at")
   deletedBy       String?            @map("deleted_by")
-  version         String             @map("version")
+  version         Int                @map("version")
   rolePermissions RolePermissions[]
   userAccounts    UserAccounts[]
   @@map("roles")
+  @@index([uuid])
 }
 
 model UserAccounts {
   id          Int       @id @default(autoincrement())
   uuid        String    @unique
-  description String    @map("description")
+  description String?    @map("description")
   email       String    @unique
   roleUuid    String?   @map("role_uuid")
   loginType   LoginType @map("login_type")
@@ -79,9 +81,12 @@ model UserAccounts {
   updatedBy   String    @map("updated_by")
   deletedAt   DateTime? @map("deleted_at")
   deletedBy   String?   @map("deleted_by")
-  version     String    @map("version")
+  version     Int       @map("version")
   roles       Roles?    @relation(fields: [roleUuid], references: [uuid])
   @@map("user_accounts")
+  @@index([uuid])
+  @@index([email])
+  @@index([roleUuid])
 }
 
 enum LoginType {

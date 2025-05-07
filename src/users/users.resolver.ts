@@ -13,7 +13,9 @@ import { GqlAuthGuard } from '../auth/gql-auth.guard';
 import { UsersService } from './users.service';
 import { UserAccount } from './models/user.model';
 import { UpdateUserInput } from './dto/update-user.input';
-import { Role } from 'src/roles/entities/role.entity';
+import { Role as RoleEntities } from 'src/roles/entities/role.entity';
+import { Role } from '../common/graphql/enums';
+import { Roles } from '../common/decorators/roles.decorator';
 @Resolver(() => UserAccount)
 @UseGuards(GqlAuthGuard)
 export class UsersResolver {
@@ -32,6 +34,12 @@ export class UsersResolver {
     return this.usersService.findOneUser(uuid);
   }
 
+  @Query(() => [UserAccount])
+  async users(): Promise<UserAccount[]> {
+    return this.usersService.findAllUsers();
+  }
+
+  @Roles(Role.ADMIN, Role.USER)
   @UseGuards(GqlAuthGuard)
   @Mutation(() => UserAccount)
   async updateUser(
@@ -41,7 +49,17 @@ export class UsersResolver {
     return this.usersService.updateUser(user.uuid, newUserData);
   }
 
-  @ResolveField(() => Role)
+  @Roles(Role.ADMIN, Role.USER)
+  @UseGuards(GqlAuthGuard)
+  @Mutation(() => UserAccount)
+  async deleteUser(
+    @UserEntity() user: UserAccount,
+    @Args('uuid') uuid: string,
+  ) {
+    return this.usersService.deleteUser(user.uuid, uuid);
+  }
+
+  @ResolveField(() => RoleEntities)
   role(@Parent() user: UserAccount) {
     return this.prisma.userAccounts
       .findUnique({ where: { uuid: user.uuid } })

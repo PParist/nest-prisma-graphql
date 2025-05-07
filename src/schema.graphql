@@ -27,14 +27,14 @@ A field whose value is a JSON Web Token (JWT): https://jwt.io/introduction.
 scalar JWT
 
 input LoginInput {
-  device_uuid: String
+  device_uuid: String!
   email: String!
   ip_address: String
   login_token: String!
   login_type: LoginType!
   role: String
   uuid: String
-  version: String
+  version: Int
 }
 
 """Types of login methods"""
@@ -49,6 +49,7 @@ enum LoginType {
 
 type Mutation {
   createRole(createRoleInput: CreateRoleInput!): Role!
+  deleteUser(uuid: String!): UserAccount!
   login(data: LoginInput!): Auth!
   refreshToken(token: JWT!): Token!
   register(data: RegisterInput!): Auth!
@@ -70,7 +71,7 @@ type Post {
   updatedAt: Date
   updatedBy: String
   uuid: String!
-  version: String
+  version: Int
 }
 
 type Query {
@@ -80,17 +81,17 @@ type Query {
   role(id: Int!): Role!
   roles: [Role!]!
   user(uuid: String!): UserAccount!
+  users: [UserAccount!]!
 }
 
 input RegisterInput {
   description: String
-  device_uuid: String
+  device_uuid: String!
   email: String!
   ip_address: String
   login_token: String!
   login_type: LoginType!
-  role_uuid: String
-  version: String!
+  role: String
 }
 
 type Role {
@@ -104,7 +105,7 @@ type Role {
   updatedAt: Date
   updatedBy: String
   uuid: String!
-  version: String
+  version: Int
 }
 
 type Subscription {
@@ -138,6 +139,7 @@ type UserAccount {
   createdBy: String
   deletedAt: Date
   deletedBy: String
+  description: String
   email: String!
   id: Int
   login_type: LoginType
@@ -146,5 +148,5 @@ type UserAccount {
   updatedAt: Date
   updatedBy: String
   uuid: String
-  version: String
+  version: Int
 }
