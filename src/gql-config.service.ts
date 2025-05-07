@@ -9,7 +9,8 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
 export class GqlConfigService implements GqlOptionsFactory {
   constructor(private configService: ConfigService) {}
   createGqlOptions(): ApolloDriverConfig {
-    const graphqlConfig = this.configService.get<GraphqlConfig>('graphql');
+    const graphqlConfig =
+      this.configService.get<GraphqlConfig>('config.graphql');
     return {
       // schema options
       autoSchemaFile: graphqlConfig.schemaDestination || './src/schema.graphql',
