@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { ApolloDriverConfig } from '@nestjs/apollo';
 import { Injectable } from '@nestjs/common';
 import { GqlOptionsFactory } from '@nestjs/graphql';
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 
 @Injectable()
 export class GqlConfigService implements GqlOptionsFactory {
@@ -15,8 +16,8 @@ export class GqlConfigService implements GqlOptionsFactory {
       sortSchema: graphqlConfig.sortSchema,
       buildSchemaOptions: {
         numberScalarMode: 'integer',
-        //dateScalarMode: 'isoDate',
       },
+      plugins: [ApolloServerPluginLandingPageLocalDefault()],
       // subscription
       installSubscriptionHandlers: true,
       includeStacktraceInErrorResponses: graphqlConfig.debug,

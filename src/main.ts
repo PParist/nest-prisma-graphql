@@ -48,6 +48,6 @@ async function bootstrap() {
       credentials: true,
     });
   }
-  await app.listen(process.env.PORT || nestConfig.port || 3000);
+  await app.listen(process.env.PORT || nestConfig.port || 3350);
 }
 bootstrap();

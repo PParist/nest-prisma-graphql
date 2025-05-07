@@ -6,11 +6,13 @@ services:
       context: ..
       dockerfile: resources/Dockerfile
     ports:
-      - '3000:3000'
+      - '3350:3350'
     depends_on:
       - postgres
     env_file:
       - ../.env
+    networks:
+      - app-network
 
   postgres:
     image: postgres:15
@@ -22,6 +24,12 @@ services:
       - ../.env
     volumes:
       - postgres:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   postgres:
