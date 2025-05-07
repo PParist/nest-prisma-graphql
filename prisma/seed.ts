@@ -22,7 +22,7 @@ async function main() {
       updatedBy: '550e8400-e29b-41d4-a716-446655440000',
       deletedAt: null,
       deletedBy: null,
-      version: '0.0.1',
+      version: 1,
     },
   });
 
@@ -37,7 +37,7 @@ async function main() {
       updatedBy: '550e8400-e29b-41d4-a716-446655440000',
       deletedAt: null,
       deletedBy: null,
-      version: '0.0.1',
+      version: 1,
     },
   });
 
@@ -52,7 +52,7 @@ async function main() {
       updatedBy: '550e8400-e29b-41d4-a716-446655440000',
       deletedAt: null,
       deletedBy: null,
-      version: '0.0.1',
+      version: 1,
     },
   });
 
@@ -67,7 +67,7 @@ async function main() {
       updatedBy: '550e8400-e29b-41d4-a716-446655440000',
       deletedAt: null,
       deletedBy: null,
-      version: '0.0.1',
+      version: 1,
     },
   });
 
@@ -85,7 +85,7 @@ async function main() {
       updatedBy: '550e8400-e29b-41d4-a716-446655442001',
       deletedAt: null,
       deletedBy: null,
-      version: '0.0.1',
+      version: 1,
     },
   });
 
@@ -101,7 +101,7 @@ async function main() {
       updatedBy: '550e8400-e29b-41d4-a716-446655442002',
       deletedAt: null,
       deletedBy: null,
-      version: '0.0.1',
+      version: 1,
     },
   });
 
@@ -117,7 +117,7 @@ async function main() {
       updatedBy: '550e8400-e29b-41d4-a716-446655442003',
       deletedAt: null,
       deletedBy: null,
-      version: '0.0.1',
+      version: 1,
     },
   });
 
@@ -133,7 +133,7 @@ async function main() {
       updatedBy: '550e8400-e29b-41d4-a716-446655442004',
       deletedAt: null,
       deletedBy: null,
-      version: '0.0.1',
+      version: 1,
     },
   });
 
@@ -154,7 +154,7 @@ async function main() {
       updatedBy: '550e8400-e29b-41d4-a716-446655440000',
       deletedAt: null,
       deletedBy: null,
-      version: '0.0.1',
+      version: 1,
     },
   });
 
@@ -168,7 +168,7 @@ async function main() {
       updatedBy: '550e8400-e29b-41d4-a716-446655440000',
       deletedAt: null,
       deletedBy: null,
-      version: '0.0.1',
+      version: 1,
     },
   });
 
@@ -190,7 +190,7 @@ async function main() {
       updatedBy: '550e8400-e29b-41d4-a716-446655440000',
       deletedAt: null,
       deletedBy: null,
-      version: '0.0.1',
+      version: 1,
     },
   });
 
@@ -210,7 +210,7 @@ async function main() {
       updatedBy: '550e8400-e29b-41d4-a716-446655440000',
       deletedAt: null,
       deletedBy: null,
-      version: '0.0.1',
+      version: 1,
     },
   });
 

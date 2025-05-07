@@ -14,7 +14,7 @@ Table permissions {
   updatedBy String [not null]
   deletedAt DateTime
   deletedBy String
-  version String [not null]
+  version Int [not null]
   rolePermissions role_permissions [not null]
 }
 
@@ -28,7 +28,7 @@ Table role_permissions {
   updatedBy String [not null]
   deletedAt DateTime
   deletedBy String
-  version String [not null]
+  version Int [not null]
   permissions permissions [not null]
   roles roles [not null]
 }
@@ -44,7 +44,7 @@ Table roles {
   updatedBy String [not null]
   deletedAt DateTime
   deletedBy String
-  version String [not null]
+  version Int [not null]
   rolePermissions role_permissions [not null]
   userAccounts user_accounts [not null]
 }
@@ -52,7 +52,7 @@ Table roles {
 Table user_accounts {
   id Int [pk, increment]
   uuid String [unique, not null]
-  description String [not null]
+  description String
   email String [unique, not null]
   roleUuid String
   loginType LoginType [not null]
@@ -65,7 +65,7 @@ Table user_accounts {
   updatedBy String [not null]
   deletedAt DateTime
   deletedBy String
-  version String [not null]
+  version Int [not null]
   roles roles
 }
 

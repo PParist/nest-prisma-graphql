@@ -16,6 +16,9 @@ export class UserAccount extends BaseModel {
   @IsEmail()
   email: string;
 
+  @Field({ nullable: true })
+  description?: string;
+
   @Field(() => LoginType, { nullable: true })
   login_type: LoginType;
 

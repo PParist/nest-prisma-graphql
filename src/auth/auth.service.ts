@@ -14,6 +14,7 @@ import { RegisterInput } from './dto/register.input';
 import { Token } from './models/token.model';
 import { SecurityConfig } from '../common/configs/config.interface';
 import { LoginInput } from './dto/login.input';
+import { Constants } from 'src/common/constans/string';
 
 @Injectable()
 export class AuthService {
@@ -30,13 +31,27 @@ export class AuthService {
     refreshToken: string;
   }> {
     try {
+      // Determine the role - default to "guest" if role is null
+      const roleName = payload.role
+        ? payload.role.toLowerCase()
+        : Constants.ROLES.GUEST;
+
+      // Find the role by name
+      const userRole = await this.prisma.roles.findUnique({
+        where: { name: roleName },
+      });
+
+      if (!userRole) {
+        throw new BadRequestException(`Role "${roleName}" not found.`);
+      }
+
       const newUuid = uuidv4();
       const newUser = await this.prisma.userAccounts.create({
         data: {
           uuid: newUuid,
           email: payload.email,
           description: payload.description,
-          roleUuid: payload.role_uuid,
+          roleUuid: userRole.uuid, // Use the role's uuid, not the whole role object
           loginType: payload.login_type,
           loginToken: payload.login_token,
           deviceUuid: payload.device_uuid,
@@ -47,9 +62,11 @@ export class AuthService {
           updatedBy: newUuid,
           deletedAt: null,
           deletedBy: null,
-          version: payload.version,
+          version: 1,
         },
       });
+
+      // Fetch the user with role information
       const userWithRole = await this.prisma.userAccounts.findUnique({
         where: { uuid: newUser.uuid },
         include: { roles: true },
@@ -77,45 +94,58 @@ export class AuthService {
   }
 
   async login(loginInput: LoginInput): Promise<Token> {
-    if (loginInput.role) {
-      const userRole = await this.prisma.roles.findUnique({
-        where: { uuid: loginInput.role },
+    try {
+      if (loginInput.role) {
+        const userRole = await this.prisma.roles.findUnique({
+          where: { uuid: loginInput.role },
+        });
+
+        if (!userRole) {
+          throw new BadRequestException('Role Not Found.');
+        }
+      }
+
+      const user = await this.prisma.userAccounts.findFirst({
+        where: {
+          email: loginInput.email,
+          loginType: loginInput.login_type,
+        },
+        include: {
+          roles: true,
+        },
       });
 
-      if (!userRole) {
-        throw new BadRequestException('Role Not Found.');
+      if (!user) {
+        throw new UnauthorizedException('User Not Found.');
       }
+
+      if (user.deviceUuid !== loginInput.device_uuid) {
+        throw new UnauthorizedException(
+          'Login attempt from different device detected.',
+        );
+      }
+
+      return this.generateTokens({
+        email: user.email,
+        userUuid: user.uuid,
+        role: user.roles.name,
+      });
+    } catch (error) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof UnauthorizedException
+      ) {
+        throw error;
+      }
+      throw new UnauthorizedException('Login failed. Please try again.');
     }
-
-    const user = await this.prisma.userAccounts.findFirst({
-      where: {
-        email: loginInput.email,
-        loginType: loginInput.login_type,
-      },
-      include: {
-        roles: true,
-      },
-    });
-
-    if (user.deviceUuid !== loginInput.device_uuid) {
-      throw new UnauthorizedException(
-        'Login attempt from different device detected.',
-      );
-    }
-
-    if (!user) {
-      throw new UnauthorizedException('User Not Found.');
-    }
-
-    return this.generateTokens({
-      email: user.email,
-      userUuid: user.uuid,
-      role: user.roles.name,
-    });
   }
 
   validateUser(userUuid: string): Promise<UserAccounts> {
-    return this.prisma.userAccounts.findUnique({ where: { uuid: userUuid } });
+    return this.prisma.userAccounts.findUnique({
+      where: { uuid: userUuid },
+      include: { roles: true },
+    });
   }
 
   getUserFromToken(token: string): Promise<UserAccounts> {
@@ -142,7 +172,8 @@ export class AuthService {
   }
 
   private generateRefreshToken(payload: { email: string }): string {
-    const securityConfig = this.configService.get<SecurityConfig>('security');
+    const securityConfig =
+      this.configService.get<SecurityConfig>('config.security');
     return this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_REFRESH_SECRET'),
       expiresIn: securityConfig.refreshIn,
