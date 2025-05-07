@@ -14,7 +14,8 @@ import { SecurityConfig } from '../common/configs/config.interface';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       useFactory: async (configService: ConfigService) => {
-        const securityConfig = configService.get<SecurityConfig>('security');
+        const securityConfig =
+          configService.get<SecurityConfig>('config.security');
         return {
           secret: configService.get<string>('JWT_ACCESS_SECRET'),
           signOptions: {

@@ -24,9 +24,9 @@ async function bootstrap() {
   app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter));
 
   const configService = app.get(ConfigService);
-  const nestConfig = configService.get<NestConfig>('nest');
-  const corsConfig = configService.get<CorsConfig>('cors');
-  const swaggerConfig = configService.get<SwaggerConfig>('swagger');
+  const nestConfig = configService.get<NestConfig>('config.nest');
+  const corsConfig = configService.get<CorsConfig>('config.cors');
+  const swaggerConfig = configService.get<SwaggerConfig>('config.swagger');
 
   // Swagger Api
   if (swaggerConfig.enabled) {

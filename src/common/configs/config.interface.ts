@@ -4,6 +4,7 @@ export interface Config {
   swagger: SwaggerConfig;
   graphql: GraphqlConfig;
   security: SecurityConfig;
+  redis: RedisConfig;
 }
 
 export interface NestConfig {
@@ -36,4 +37,14 @@ export interface SecurityConfig {
   expiresIn: string;
   refreshIn: string;
   bcryptSaltOrRound: string | number;
+}
+
+export interface RedisConfig {
+  host: string;
+  port: number;
+  password?: string;
+  username?: string;
+  db?: number;
+  tls?: boolean;
+  retryStrategy?: (times: number) => number | void;
 }
