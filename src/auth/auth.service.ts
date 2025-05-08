@@ -15,6 +15,8 @@ import { Token } from './models/token.model';
 import { SecurityConfig } from '../common/configs/config.interface';
 import { LoginInput } from './dto/login.input';
 import { Constants } from 'src/common/constans/string';
+import { CacheLayerService } from '../cache/cache-layer.service';
+import { CACHE_KEYS, CACHE_TTL, PERFIX } from '@common/constans/cache';
 
 @Injectable()
 export class AuthService {
@@ -23,7 +25,12 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly passwordService: PasswordService,
     private readonly configService: ConfigService,
+    private cacheService: CacheLayerService,
   ) {}
+
+  private getUserAccountCacheKey(uuid: string): string {
+    return CACHE_KEYS.USERACCOUNT(uuid);
+  }
 
   async createUser(payload: RegisterInput): Promise<{
     user: UserAccounts;

@@ -1,7 +1,7 @@
 // src/cache/distributed-cache.service.ts
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { CachePort } from './port/cache.port';
-import { PERFIX } from 'src/common/constants/cache';
+import { PERFIX } from '@common/constans/cache';
 
 @Injectable()
 export class DistributedCacheService {

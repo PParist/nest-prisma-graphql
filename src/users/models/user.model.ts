@@ -24,4 +24,23 @@ export class UserAccount extends BaseModel {
 
   @Field({ nullable: true })
   role_uuid?: string;
+
+  static parse(userModel: any): UserAccount {
+    if (!userModel) return null;
+    const user = new UserAccount();
+    user.id = userModel.id;
+    user.uuid = userModel.uuid;
+    user.email = userModel.email;
+    user.description = userModel.description;
+    user.login_type = userModel.loginType;
+    user.role_uuid = userModel.roleUuid;
+    user.createdAt = userModel.createdAt;
+    user.updatedAt = userModel.updatedAt;
+    user.deletedAt = userModel.deletedAt;
+    user.deletedBy = userModel.deletedBy;
+    user.createdBy = userModel.createdBy;
+    user.updatedBy = userModel.updatedBy;
+    user.version = userModel.version;
+    return user;
+  }
 }

@@ -58,6 +58,26 @@ type Mutation {
   updateUser(data: UpdateUserInput!): UserAccount!
 }
 
+"""
+Possible directions in which to order a list of items when provided an `orderBy` argument.
+"""
+enum OrderDirection {
+  asc
+  desc
+}
+
+type PaginatedUserAccounts {
+  data: [UserAccount!]!
+  meta: PaginationMeta!
+}
+
+type PaginationMeta {
+  limit: Int!
+  page: Int!
+  pages: Int!
+  total: Int!
+}
+
 type Post {
   author: UserAccount
   content: String
@@ -78,6 +98,7 @@ type Query {
   hello(name: String!): String!
   helloWorld: String!
   myuser: UserAccount!
+  paginatedUsers(limit: Int = 100, orderBy: String = "updatedAt", orderDirection: OrderDirection = desc, page: Int = 1): PaginatedUserAccounts!
   role(id: Int!): Role!
   roles: [Role!]!
   user(uuid: String!): UserAccount!
