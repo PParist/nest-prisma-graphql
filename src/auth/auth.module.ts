@@ -9,9 +9,11 @@ import { AuthResolver } from './auth.resolver';
 import { JwtStrategy } from './jwt.strategy';
 import { SecurityConfig } from '../common/configs/config.interface';
 import { Reflector } from '@nestjs/core';
+import { CacheModule } from '../cache/cache.module';
 
 @Module({
   imports: [
+    CacheModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       useFactory: async (configService: ConfigService) => {

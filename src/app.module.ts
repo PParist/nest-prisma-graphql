@@ -12,6 +12,7 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { GqlConfigService } from './gql-config.service';
 import { RolesModule } from './roles/roles.module';
 import { DateScalar } from './common/scalars/date.scalar';
+import { CacheModule } from './cache/cache.module';
 
 import { registerGraphQLEnums } from './common/graphql/enums';
 import config from './common/configs/config';
@@ -43,6 +44,7 @@ registerGraphQLEnums(config().graphql);
     UsersModule,
     PostsModule,
     RolesModule,
+    CacheModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppResolver, DateScalar],
