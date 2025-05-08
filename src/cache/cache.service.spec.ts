@@ -6,7 +6,13 @@ describe('LocalCacheService ', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [LocalCacheService],
+      providers: [
+        LocalCacheService,
+        {
+          provide: 'LOCAL_CACHE_PORT',
+          useValue: 6379,
+        },
+      ],
     }).compile();
 
     service = module.get<LocalCacheService>(LocalCacheService);
