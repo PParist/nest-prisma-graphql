@@ -4,11 +4,13 @@ generator client {
 
 generator dbml {
   provider = "prisma-dbml-generator"
+  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  schemas  = ["localpostgres", "public"]
 }
 
 model Permissions {
@@ -26,6 +28,7 @@ model Permissions {
   version          Int                @map("version")
   rolePermissions  RolePermissions[]
 
+  @@schema("localpostgres")
   @@map("permissions")
   @@index([uuid])
 }
@@ -44,6 +47,7 @@ model RolePermissions {
   permissions     Permissions  @relation(fields: [permissionUuid], references: [uuid])
   roles           Roles        @relation(fields: [roleUuid], references: [uuid])
 
+  @@schema("localpostgres")
   @@map("role_permissions")
 }
 
@@ -61,6 +65,8 @@ model Roles {
   version         Int                @map("version")
   rolePermissions RolePermissions[]
   userAccounts    UserAccounts[]
+  
+  @@schema("localpostgres")
   @@map("roles")
   @@index([uuid])
 }
@@ -83,6 +89,8 @@ model UserAccounts {
   deletedBy   String?   @map("deleted_by")
   version     Int       @map("version")
   roles       Roles?    @relation(fields: [roleUuid], references: [uuid])
+  
+  @@schema("localpostgres")
   @@map("user_accounts")
   @@index([uuid])
   @@index([email])
@@ -96,4 +104,6 @@ enum LoginType {
   APPLE
   HUAWEI
   GUEST
+
+  @@schema("localpostgres")
 }

@@ -11,12 +11,12 @@ services:
     command: redis-server --appendonly yes
     restart: unless-stopped
     networks:
-      - redis-network
+      - shared-network 
 
 volumes:
   redis-data:
     driver: local
 
 networks:
-  redis-network:
-    driver: bridge
+  shared-network:
+    external: true
