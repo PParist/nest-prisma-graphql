@@ -16,7 +16,7 @@ import { SecurityConfig } from '../common/configs/config.interface';
 import { LoginInput } from './dto/login.input';
 import { Constants } from 'src/common/constans/string';
 import { CacheLayerService } from '../cache/cache-layer.service';
-import { CACHE_KEYS, CACHE_TTL, PERFIX } from '@common/constans/cache';
+import { CACHE_KEYS, CACHE_TTL } from '@common/constans/cache';
 
 @Injectable()
 export class AuthService {
@@ -38,19 +38,29 @@ export class AuthService {
     refreshToken: string;
   }> {
     try {
-      // Determine the role - default to "guest" if role is null
-      const roleName = payload.role
-        ? payload.role.toLowerCase()
-        : Constants.ROLES.GUEST;
-
-      // Find the role by name
-      const userRole = await this.prisma.roles.findUnique({
-        where: { name: roleName },
+      const existingUser = await this.prisma.userAccounts.findFirst({
+        where: {
+          email: payload.email,
+          loginType: payload.login_type,
+        },
       });
 
-      if (!userRole) {
-        throw new BadRequestException(`Role "${roleName}" not found.`);
+      if (existingUser) {
+        throw new ConflictException(
+          `User with email ${payload.email} and login type ${payload.login_type} already exists.`,
+        );
       }
+
+      const role = await this.cacheService.get(
+        CACHE_KEYS.ROLE(Constants.ROLES.USER),
+        () =>
+          this.prisma.roles.findFirst({
+            where: {
+              name: Constants.ROLES.USER,
+            },
+          }),
+        CACHE_TTL.LOCAL_FINDONE,
+      );
 
       const newUuid = uuidv4();
       const newUser = await this.prisma.userAccounts.create({
@@ -58,7 +68,7 @@ export class AuthService {
           uuid: newUuid,
           email: payload.email,
           description: payload.description,
-          roleUuid: userRole.uuid, // Use the role's uuid, not the whole role object
+          roleUuid: role.uuid,
           loginType: payload.login_type,
           loginToken: payload.login_token,
           deviceUuid: payload.device_uuid,
@@ -73,15 +83,12 @@ export class AuthService {
         },
       });
 
-      // Fetch the user with role information
-      const userWithRole = await this.prisma.userAccounts.findUnique({
-        where: { uuid: newUser.uuid },
-        include: { roles: true },
-      });
+      await this.cacheService.invalidatePattern('user_accounts:*');
       const tokens = this.generateTokens({
         email: newUser.email,
         userUuid: newUser.uuid,
-        role: userWithRole.roles.name,
+        role: role.name,
+        deviceUuid: newUser.deviceUuid,
       });
       return {
         user: newUser,
@@ -93,7 +100,6 @@ export class AuthService {
         e instanceof Prisma.PrismaClientKnownRequestError &&
         e.code === 'P2002'
       ) {
-        console.error('Unique constraint failed:', e.message);
         throw new ConflictException(`Email ${payload.email} already used.`);
       }
       throw new Error(e.message);
@@ -102,16 +108,6 @@ export class AuthService {
 
   async login(loginInput: LoginInput): Promise<Token> {
     try {
-      if (loginInput.role) {
-        const userRole = await this.prisma.roles.findUnique({
-          where: { uuid: loginInput.role },
-        });
-
-        if (!userRole) {
-          throw new BadRequestException('Role Not Found.');
-        }
-      }
-
       const user = await this.prisma.userAccounts.findFirst({
         where: {
           email: loginInput.email,
@@ -123,19 +119,21 @@ export class AuthService {
       });
 
       if (!user) {
-        throw new UnauthorizedException('User Not Found.');
-      }
-
-      if (user.deviceUuid !== loginInput.device_uuid) {
-        throw new UnauthorizedException(
-          'Login attempt from different device detected.',
-        );
+        const registerModel = RegisterInput.toRegisterModel(loginInput);
+        return this.createUser(registerModel);
+      } else {
+        if (user.deviceUuid !== loginInput.device_uuid) {
+          throw new UnauthorizedException(
+            'Login attempt from different device detected.',
+          );
+        }
       }
 
       return this.generateTokens({
         email: user.email,
         userUuid: user.uuid,
         role: user.roles.name,
+        deviceUuid: user.deviceUuid,
       });
     } catch (error) {
       if (
@@ -163,6 +161,7 @@ export class AuthService {
   generateTokens(payload: {
     email: string;
     userUuid: string;
+    deviceUuid: string;
     role: string;
   }): Token {
     return {
@@ -174,11 +173,15 @@ export class AuthService {
   private generateAccessToken(payload: {
     email: string;
     userUuid: string;
+    deviceUuid: string;
   }): string {
     return this.jwtService.sign(payload);
   }
 
-  private generateRefreshToken(payload: { email: string }): string {
+  private generateRefreshToken(payload: {
+    email: string;
+    deviceUuid: string;
+  }): string {
     const securityConfig =
       this.configService.get<SecurityConfig>('config.security');
     return this.jwtService.sign(payload, {
@@ -189,14 +192,18 @@ export class AuthService {
 
   refreshToken(token: string) {
     try {
-      const { email, userUuid, role } = this.jwtService.verify(token, {
-        secret: this.configService.get('JWT_REFRESH_SECRET'),
-      });
+      const { email, userUuid, role, deviceUuid } = this.jwtService.verify(
+        token,
+        {
+          secret: this.configService.get('JWT_REFRESH_SECRET'),
+        },
+      );
 
       return this.generateTokens({
         email,
         userUuid,
         role,
+        deviceUuid,
       });
     } catch (e) {
       throw new UnauthorizedException(e.message);

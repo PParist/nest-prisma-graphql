@@ -28,11 +28,10 @@ scalar JWT
 
 input LoginInput {
   device_uuid: String!
-  email: String!
+  email: String
   ip_address: String
   login_token: String!
   login_type: LoginType!
-  role: String
   uuid: String
   version: Int
 }
@@ -108,11 +107,10 @@ type Query {
 input RegisterInput {
   description: String
   device_uuid: String!
-  email: String!
+  email: String
   ip_address: String
   login_token: String!
   login_type: LoginType!
-  role: String
 }
 
 type Role {

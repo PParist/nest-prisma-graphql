@@ -1,5 +1,6 @@
 export interface JwtDto {
   userUuid: string;
+  deviceUuid: string;
   /**
    * Issued at
    */

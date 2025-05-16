@@ -53,7 +53,7 @@ Table user_accounts {
   id Int [pk, increment]
   uuid String [unique, not null]
   description String
-  email String [unique, not null]
+  email String
   roleUuid String
   loginType LoginType [not null]
   loginToken String [not null]
@@ -67,6 +67,10 @@ Table user_accounts {
   deletedBy String
   version Int [not null]
   roles roles
+
+  indexes {
+    (email, loginType) [unique]
+  }
 }
 
 Enum LoginType {

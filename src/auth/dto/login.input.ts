@@ -7,9 +7,9 @@ export class LoginInput {
   @Field({ nullable: true })
   uuid?: string;
 
-  @Field()
-  @IsEmail()
-  email: string;
+  @Field({ nullable: true })
+  //@IsEmail()
+  email?: string;
 
   @Field()
   @IsNotEmpty()
@@ -23,9 +23,6 @@ export class LoginInput {
 
   @Field({ nullable: true })
   ip_address?: string;
-
-  @Field({ nullable: true })
-  role?: string;
 
   @Field()
   version?: number;

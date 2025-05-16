@@ -13,7 +13,7 @@ export class CacheLayerService {
   ) {}
 
   /**
-   * ดึงข้อมูลจาก cache ตามลำดับชั้น: local -> distributed -> factory
+   * ดึงข้อมูลจาก cache ตามลำดับชั้น: local -> database
    * @param key Cache key
    * @param factory Function ที่จะถูกเรียกเมื่อไม่พบข้อมูลใน cache
    * @param ttl Time to live in seconds (optional)
@@ -22,7 +22,46 @@ export class CacheLayerService {
   async get<T>(
     key: string,
     factory: () => Promise<T | null>,
-    ttl: number = 600,
+    localttl: number = 600,
+  ): Promise<T | null> {
+    // 1. ลองดึงจาก local cache ก่อน (เร็วที่สุด)
+    try {
+      const localData = await this.localCache.get<T>(key);
+      if (localData !== null) {
+        this.logger.debug(`Cache hit (local): ${key}`);
+        return localData;
+      }
+    } catch (error) {
+      this.logger.warn(`Error getting from local cache: ${error.message}`);
+    }
+
+    // ดึงจากฐานข้อมูลหรือแหล่งข้อมูลอื่นๆ ผ่าน factory function
+    try {
+      this.logger.debug(`Cache miss: ${key}, executing factory function`);
+      const data = await factory();
+
+      if (data !== null) {
+        await this.setLocal(key, data, localttl);
+      }
+
+      return data;
+    } catch (error) {
+      this.logger.error(`Error executing factory function: ${error.message}`);
+      throw error;
+    }
+  }
+  /**
+   * ดึงข้อมูลจาก cache ตามลำดับชั้น: local -> distributed -> factory
+   * @param key Cache key
+   * @param factory Function ที่จะถูกเรียกเมื่อไม่พบข้อมูลใน cache
+   * @param ttl Time to live in seconds (optional)
+   * @returns ข้อมูลจาก cache หรือจาก factory
+   */
+  async gets<T>(
+    key: string,
+    factory: () => Promise<T | null>,
+    localttl: number = 600,
+    distributedttl: number = 600,
   ): Promise<T | null> {
     // 1. ลองดึงจาก local cache ก่อน (เร็วที่สุด)
     try {
@@ -42,7 +81,7 @@ export class CacheLayerService {
         this.logger.debug(`Cache hit (distributed): ${key}`);
 
         // Backfill local cache
-        await this.setLocal(key, distributedData, ttl);
+        await this.setLocal(key, distributedData, localttl);
 
         return distributedData;
       }
@@ -59,7 +98,7 @@ export class CacheLayerService {
 
       if (data !== null) {
         // บันทึกลงใน cache ทั้งสองระดับ
-        await this.set(key, data, ttl);
+        await this.setAll(key, data, localttl, distributedttl);
       }
 
       return data;
@@ -70,16 +109,31 @@ export class CacheLayerService {
   }
 
   /**
+   * บันทึกข้อมูลลงใน cache local
+   * @param key Cache key
+   * @param value ข้อมูลที่จะบันทึก
+   * @param ttl Time to live in seconds (optional)
+   */
+  async set<T>(key: string, value: T, localttl): Promise<void> {
+    await Promise.all([this.setLocal(key, value, localttl)]);
+  }
+
+  /**
    * บันทึกข้อมูลลงใน cache ทั้งสองระดับ
    * @param key Cache key
    * @param value ข้อมูลที่จะบันทึก
    * @param ttl Time to live in seconds (optional)
    */
-  async set<T>(key: string, value: T, ttl: number = 600): Promise<void> {
+  async setAll<T>(
+    key: string,
+    value: T,
+    localttl,
+    distributedttl,
+  ): Promise<void> {
     // บันทึกทั้ง local และ distributed cache พร้อมกัน
     await Promise.all([
-      this.setLocal(key, value, ttl),
-      this.setDistributed(key, value, ttl),
+      this.setLocal(key, value, localttl),
+      this.setDistributed(key, value, distributedttl),
     ]);
   }
 

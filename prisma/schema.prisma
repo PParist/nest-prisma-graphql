@@ -10,7 +10,7 @@ generator dbml {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  schemas  = ["localpostgres", "public"]
+  schemas  = ["developer", "public"]
 }
 
 model Permissions {
@@ -28,7 +28,7 @@ model Permissions {
   version          Int                @map("version")
   rolePermissions  RolePermissions[]
 
-  @@schema("localpostgres")
+  @@schema("developer")
   @@map("permissions")
   @@index([uuid])
 }
@@ -47,7 +47,7 @@ model RolePermissions {
   permissions     Permissions  @relation(fields: [permissionUuid], references: [uuid])
   roles           Roles        @relation(fields: [roleUuid], references: [uuid])
 
-  @@schema("localpostgres")
+  @@schema("developer")
   @@map("role_permissions")
 }
 
@@ -66,7 +66,7 @@ model Roles {
   rolePermissions RolePermissions[]
   userAccounts    UserAccounts[]
   
-  @@schema("localpostgres")
+  @@schema("developer")
   @@map("roles")
   @@index([uuid])
 }
@@ -74,8 +74,8 @@ model Roles {
 model UserAccounts {
   id          Int       @id @default(autoincrement())
   uuid        String    @unique
-  description String?    @map("description")
-  email       String    @unique
+  description String?   @map("description")
+  email       String?   @map("email")
   roleUuid    String?   @map("role_uuid")
   loginType   LoginType @map("login_type")
   loginToken  String    @map("login_token")
@@ -90,8 +90,9 @@ model UserAccounts {
   version     Int       @map("version")
   roles       Roles?    @relation(fields: [roleUuid], references: [uuid])
   
-  @@schema("localpostgres")
+  @@schema("developer")
   @@map("user_accounts")
+  @@unique([email, loginType])
   @@index([uuid])
   @@index([email])
   @@index([roleUuid])
@@ -105,5 +106,5 @@ enum LoginType {
   HUAWEI
   GUEST
 
-  @@schema("localpostgres")
+  @@schema("developer")
 }

@@ -25,7 +25,7 @@ export class UsersService {
   }
 
   private getListCacheKey(options?: OptionalPaginationArgs): string {
-    if (!options) return CACHE_KEYS.ALL_USERACCOUNTS;
+    if (!options) return CACHE_KEYS.ALL_USER_ACCOUNTS;
 
     const {
       page = 1,
@@ -105,7 +105,7 @@ export class UsersService {
 
           return UserAccount.parse(userModel);
         },
-        CACHE_TTL.USER_ACCOUNT,
+        CACHE_TTL.LOCAL_FINDONE,
       );
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -118,7 +118,7 @@ export class UsersService {
   async findAllUsers(): Promise<UserAccount[]> {
     try {
       const result = await this.cacheService.get<PaginatedUserAccounts>(
-        CACHE_KEYS.ALL_USERACCOUNTS,
+        CACHE_KEYS.ALL_USER_ACCOUNTS,
         async () => {
           const userModels = await this.prisma.userAccounts.findMany({
             where: {
@@ -141,7 +141,7 @@ export class UsersService {
             },
           };
         },
-        CACHE_TTL.ALL_USER_ACCOUNTS,
+        CACHE_TTL.LOCAL_FINDALL,
       );
 
       return result.data;
@@ -192,7 +192,7 @@ export class UsersService {
             },
           };
         },
-        CACHE_TTL.ALL_USER_ACCOUNTS,
+        CACHE_TTL.DISTRIBUTED_FINDALL,
       );
     } catch (error) {
       console.error('Error in findAllUsersWithOptions:', error);
